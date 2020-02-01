@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect
+from flask_bootstrap import  Bootstrap
 import smtplib
 #import dns.resolver
 app = Flask(__name__)
@@ -17,12 +18,22 @@ def grabUserInfo():
     password = request.form["password"]
     email = request.form["email"]
 
+    if email == "":
+        return render_template("signup.html", message = ("Please enter required fields"))
+
+    if password == "":
+        return render_template("signup.html", message = ("Please enter required fields"))
+    
+    if username == "":
+        return render_template("signup.html", message = ("Please enter required fields"))
+
+
     senderEmail = "gregholysnake@gmail.com"
     emailReciever = email
 
     regex = '^[_a-z0-9-]+(.[_a-z0-9-]+)@[a-z0-9-]+(.[a-z0-9-]+)(.[a-z]{2,})$'
 
-    body = "Your verification link is below"
+    body = username + "," + "\nYour verification link is below."
 
     mail = smtplib.SMTP("smtp.gmail.com", 587)
 
@@ -43,9 +54,7 @@ def grabUserInfo():
 def login():
     return render_template("login.html")
 
-#@app.route("//")
-#def grabUserInfo():
-    return render_template("welcome.html")
+
 
 @app.route("/activation/<string:username>", methods = ["GET"])
 def activateEmail(username):
