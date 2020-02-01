@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect
+import smtplib
+#import dns.resolver
 app = Flask(__name__)
 
 @app.route("/")
@@ -14,6 +16,27 @@ def grabUserInfo():
     username = request.form["username"]
     password = request.form["password"]
     email = request.form["email"]
+
+    senderEmail = "gregholysnake@gmail.com"
+    emailReciever = email
+
+    regex = '^[_a-z0-9-]+(.[_a-z0-9-]+)@[a-z0-9-]+(.[a-z0-9-]+)(.[a-z]{2,})$'
+
+    body = "Your verification link is below"
+
+    mail = smtplib.SMTP("smtp.gmail.com", 587)
+
+    mail.helo
+
+    #encyrpts login
+    mail.starttls()
+
+    mail.login(str(senderEmail), "montyGREGORY")
+
+    mail.sendmail(str(senderEmail), str(emailReciever), body)
+
+    mail.close()
+
     return redirect("/activation/" + username)
 
 @app.route("/login/")
