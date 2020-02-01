@@ -1,0 +1,7 @@
+Thank you ${Username} for registering with us!
+
+Below, you may find the link to activate your account.
+${activationlink}
+
+Best regards,
+blabla
