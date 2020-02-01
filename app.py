@@ -14,7 +14,7 @@ def grabUserInfo():
     username = request.form["username"]
     password = request.form["password"]
     email = request.form["email"]
-    return redirect("/activation/" + username + email)
+    return redirect("/activation/" + username)
 
 @app.route("/login/")
 def login():
