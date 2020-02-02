@@ -1,0 +1,9 @@
+{
+    "Login":
+    {
+        "Username": "postgres",
+        "Password": "pass",
+        "Database": "dummy",
+        "Table": "datatable"
+    }
+}

@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect
 import os
 import smtplib
-#import dns.resolver
+import json
+import psycopg2
 app = Flask(__name__)
 
 @app.route("/")
@@ -12,7 +13,7 @@ def index():
 def signup():
     return render_template("signup.html")
 
-@app.route("/unconfirmed/", methods = ["POST"])
+@app.route("/unconfirmed/", methods = ["POST"]) 
 def grabUserInfo():
     username = request.form["username"]
     password = request.form["password"]
@@ -30,7 +31,7 @@ def grabUserInfo():
     senderEmail = "gregholysnake@gmail.com"
     emailReciever = email
 
-    body = username + "," + "\nYou're verification link is below"
+    body = username + "," + "\nYour verification link is below"
 
     mail = smtplib.SMTP("smtp.gmail.com", 587)
 
@@ -44,9 +45,36 @@ def grabUserInfo():
     mail.sendmail(str(senderEmail), str(emailReciever), body)
 
     mail.close()
-    
+
+    # Initate database
+    with open('settings/db.json') as loop:
+            data = json.load(loop)
+
+    # Declare our data from the json file
+    databaseName = data["Login"]["Database"]
+    password = data["Login"]["Password"]
+    userName = data["Login"]["Username"]
+    table = data["Login"]["Table"]
+
+    connection = psycopg2.connect(user = data["Login"]["Username"],
+                                  password = data["Login"]["Password"],
+                                  database = data["Login"]["Database"])
+
+    cur = connection.cursor()
+
+    # Inserts the data into each column
+    cur.execute('INSERT INTO ' + table + '(username, password, email, registered) VALUES (%s, %s, %s, %s)', (username, password, email, False))
+
+    # Push the data onto the database
+    connection.commit()
+
+    # Close the database
+    connection.close()
+
+    # Redirects to the activation screen to give a custom url
     return redirect("/activation/" + username)
 
+# Our route for the login page
 @app.route("/login/")
 def login():
     return render_template("login.html")
