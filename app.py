@@ -70,16 +70,13 @@ def grabUserInfo():
     token = serializer.dumps(email, salt="nacl")
 
     #creates confirmation email CHANGE THIS
-    msg = Message("Confirmation", sender = senderEmail, recipients = email)
+    msg = Message("Confirmation", sender = senderEmail, recipients = [email])
     link = url_for("confirm_email", token = token, _external = True)
     msg.body = "Your link is {}".format(link)
     #the email loaded???
     mail.send(msg)
 
-    try: 
-        email = serializer.loads(token,salt="nacl", max_age=7200)
-    except:
-        SignatureExpired
+
     # Redirects to the activation screen to give a custom url
     return redirect("/activation/" + username)
 
@@ -95,5 +92,9 @@ def welcome():
 @app.route("/activation/<string:username>", methods = ["GET"])
 def activateEmail(username):
     return render_template("congrats.html", Username = username)
-
+#function that was added
+def confirm_email(token):
+    try: 
+        email = serializer.loads(token,salt="nacl", max_age=7200)
+    except SignatureExpired:    
 
