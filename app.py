@@ -47,13 +47,12 @@ def grabUserInfo():
     
     return redirect("/activation/" + username)
 
-
 @app.route("/login/")
 def login():
     return render_template("login.html")
 
-@app.route("/welcome/", methods = ["POST"])
-def welcomeback():
+@app.route("/welcome/")
+def welcome():
     return render_template("welcome.html")
 
 @app.route("/activation/<string:username>", methods = ["GET"])
