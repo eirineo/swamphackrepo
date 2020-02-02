@@ -1,18 +1,24 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 import os
 import smtplib
 import json
 import psycopg2
-app = Flask(__name__)
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired
 
+app = Flask(__name__)
+mail = Mail(app)
+# Renders the page
 @app.route("/")
 def index():
     return render_template("index.html")
 
+# Renders our signup page
 @app.route("/signup/")
 def signup():
     return render_template("signup.html")
 
+# Our post request for user information
 @app.route("/unconfirmed/", methods = ["POST"]) 
 def grabUserInfo():
     username = request.form["username"]
@@ -28,23 +34,6 @@ def grabUserInfo():
     elif username == "":
         return render_template("signup.html", message = ("Please enter required fields"))
 
-    senderEmail = "gregholysnake@gmail.com"
-    emailReciever = email
-
-    body = username + "," + "\nYour verification link is below"
-
-    mail = smtplib.SMTP("smtp.gmail.com", 587)
-
-    mail.helo
-
-    #encyrpts login
-    mail.starttls()
-
-    mail.login(str(senderEmail), "montyGREGORY")
-
-    mail.sendmail(str(senderEmail), str(emailReciever), body)
-
-    mail.close()
 
     # Initate database
     with open('settings/db.json') as loop:
@@ -60,6 +49,7 @@ def grabUserInfo():
                                   password = data["Login"]["Password"],
                                   database = data["Login"]["Database"])
 
+    # Assigns the cursor so we can execute commands
     cur = connection.cursor()
 
     # Inserts the data into each column
@@ -71,6 +61,25 @@ def grabUserInfo():
     # Close the database
     connection.close()
 
+    senderEmail = "gregholysnake@gmail.com"
+
+    # a randomizer of sorts
+    serializer = URLSafeTimedSerializer("goodENOUGH")
+
+    #randomized value for link
+    token = serializer.dumps(email, salt="nacl")
+
+    #creates confirmation email CHANGE THIS
+    msg = Message("Confirmation", sender = senderEmail, recipients = email)
+    link = url_for("confirm_email", token = token, _external = True)
+    msg.body = "Your link is {}".format(link)
+    #the email loaded???
+    mail.send(msg)
+
+    try: 
+        email = serializer.loads(token,salt="nacl", max_age=7200)
+    except:
+        SignatureExpired
     # Redirects to the activation screen to give a custom url
     return redirect("/activation/" + username)
 
